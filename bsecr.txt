@@ -1,0 +1,156 @@
+CREATE DATABASE  TradeCompany;
+
+USE TradeCompany;
+
+CREATE TABLE  klient (
+    id_k INT AUTO_INCREMENT PRIMARY KEY NOT NULL,
+    email_k VARCHAR(70) UNIQUE,
+    first_name_k VARCHAR(50) NOT NULL,
+    last_name_k VARCHAR(50) NOT NULL,
+    middle_name_k VARCHAR(60),
+    birth_date_k DATE,
+    phone_k VARCHAR(16) NOT NULL,
+    city_k VARCHAR(100),
+    street_k VARCHAR(100),
+    house_k VARCHAR(100),
+    apartment_k VARCHAR(20)
+);
+
+CREATE TABLE sotr (
+    guid_s CHAR(36) PRIMARY KEY  default(uuid()),
+    first_name_s VARCHAR(50) NOT NULL,
+    last_name_s VARCHAR(50) NOT NULL,
+    middle_name_s VARCHAR(60),
+    birth_date_s DATE NOT NULL,
+    phone_s VARCHAR(16) NOT NULL,
+    city_s VARCHAR(100) NOT NULL,
+    street_s VARCHAR(100) NOT NULL,
+    house_s VARCHAR(100) NOT NULL,
+    apartment_s VARCHAR(20) NOT NULL
+);
+
+CREATE TABLE  zakazi (
+    id_z INT AUTO_INCREMENT PRIMARY KEY NOT NULL,
+    id_k INT NOT NULL,
+    guid_s CHAR(36) NOT NULL,
+    date_z DATE default(current_date()),
+    payment_method ENUM('Наличные', 'Безналичный'),
+    statuss ENUM('Новый', 'В работе', 'Выполнен'),
+    FOREIGN KEY (id_k) REFERENCES klient(id_k) ON UPDATE CASCADE ON DELETE CASCADE,
+    FOREIGN KEY (guid_s) REFERENCES sotr(guid_s) ON UPDATE CASCADE ON DELETE CASCADE
+);
+
+CREATE TABLE tovar (
+    article_t VARCHAR(255) PRIMARY KEY NOT NULL,
+    namee_t VARCHAR(100) NOT NULL,
+    category_t VARCHAR(100) NOT NULL,
+    price_t DECIMAL(10, 2) NOT NULL,
+    unit_t VARCHAR(50) NOT NULL,
+    production_date_t DATE NOT NULL,
+    expiration_date_t DATE NOT NULL,
+    maker_t VARCHAR(100) NOT NULL,
+    country_t VARCHAR(60) NOT NULL
+);
+
+CREATE TABLE consist_zakaz (
+	id_z INT NOT NULL,
+    article_t VARCHAR(255) NOT NULL,
+    kolvo INT NOT NULL,
+    PRIMARY KEY (id_z, article_t),
+    FOREIGN KEY (id_z) REFERENCES zakazi(id_z) ON UPDATE CASCADE ON DELETE CASCADE,
+    FOREIGN KEY (article_t) REFERENCES tovar(article_t) ON UPDATE CASCADE ON DELETE CASCADE
+);
+-- Заполнение таблицы klient
+INSERT INTO klient (email_k, first_name_k, last_name_k, middle_name_k, birth_date_k, phone_k, city_k, street_k, house_k, apartment_k)
+VALUES
+('client1@example.com', 'Иван', 'Иванов', 'Иванович', '1990-01-01', '+79123456789', 'Москва', 'Ленина', '1', '1'),
+('client2@example.com', 'Петр', 'Петров', 'Петрович', '1985-02-02', '+79123456788', 'Санкт-Петербург', 'Невский', '2', '2'),
+('client3@example.com', 'Анна', 'Сидорова', 'Сидоровна', '1995-05-05', '+79123456781', 'Екатеринбург', 'Ленина', '10', '10'),
+('client4example.com', 'Елена', 'Смирнова', 'Алексеевна', '1980-03-03', '+79123456787', 'Москва', 'Ленина', '3', '3');
+
+-- Заполнение таблицы sotr
+INSERT INTO sotr (first_name_s, last_name_s, middle_name_s, birth_date_s, phone_s, city_s, street_s, house_s, apartment_s)
+VALUES
+('Сергей', 'Сергеев', 'Сергеевич', '1980-03-03', '+79123456787', 'Москва', 'Ленина', '3', '3'),
+('Мария', 'Иванова', 'Ивановна', '1987-04-04', '+79123456786', 'Санкт-Петербург', 'Невский', '4', '4'),
+('Елена', 'Сидорова', 'Сидоровна', '1990-06-06', '+79123456780', 'Екатеринбург', 'Ленина', '10', '10'),
+('Антон', 'Петров', 'Петрович', '1985-07-07', '+79123456785', 'Санкт-Петербург', 'Пушкина', '5', '5');
+
+-- Заполнение таблицы tovar
+INSERT INTO tovar (article_t, namee_t, category_t, price_t, unit_t, production_date_t, expiration_date_t, maker_t, country_t)
+VALUES
+('ART001', 'Товар 1', 'Категория 1', 100.00, 'шт', '2022-01-01', '2023-01-01', 'Производитель 1', 'Страна 1'),
+('ART002', 'Товар 2', 'Категория 2', 200.00, 'шт', '2022-01-02', '2023-01-02', 'Производитель 2', 'Страна 2'),
+('ART003', 'Товар 3', 'Категория 3', 300.00, 'шт', '2022-01-03', '2023-01-03', 'Производитель 3', 'Страна 3'),
+('ART004', 'Товар 4', 'Категория 4', 400.00, 'шт', '2022-01-04', '2023-01-04', 'Производитель 4', 'Страна 4');
+
+-- Заполнение таблицы zakazi
+INSERT INTO zakazi (id_k, guid_s, date_z, payment_method, statuss)
+VALUES
+(1, (SELECT guid_s FROM sotr ORDER BY RAND() LIMIT 1), '2022-01-01', 'Наличные', 'Новый'),
+(2, (SELECT guid_s FROM sotr ORDER BY RAND() LIMIT 1), '2022-01-02', 'Безналичный', 'В работе'),
+(3, (SELECT guid_s FROM sotr ORDER BY RAND() LIMIT 1), '2022-01-03', 'Наличные', 'Выполнен'),
+(4, (SELECT guid_s FROM sotr ORDER BY RAND() LIMIT 1), '2022-01-04', 'Безналичный', 'Новый'),
+(1, (SELECT guid_s FROM sotr ORDER BY RAND() LIMIT 1), '2022-01-05', 'Наличные', 'В работе'),
+(2, (SELECT guid_s FROM sotr ORDER BY RAND() LIMIT 1), '2022-01-06', 'Безналичный', 'Выполнен'),
+(3, (SELECT guid_s FROM sotr ORDER BY RAND() LIMIT 1), '2022-01-07', 'Наличные', 'Новый'),
+(4, (SELECT guid_s FROM sotr ORDER BY RAND() LIMIT 1), '2022-01-08', 'Безналичный', 'В работе'),
+(1, (SELECT guid_s FROM sotr ORDER BY RAND() LIMIT 1), '2022-01-09', 'Наличные', 'Выполнен'),
+(2, (SELECT guid_s FROM sotr ORDER BY RAND() LIMIT 1), '2022-01-10', 'Безналичный', 'Новый');
+
+-- Заполнение таблицы consist_zakaz
+INSERT INTO consist_zakaz (id_z, article_t, kolvo)
+VALUES
+(1, 'ART001', 2),
+(1, 'ART002', 3),
+(1, 'ART003', 1),
+(2, 'ART004', 2),
+(2, 'ART002', 3),
+(3, 'ART002', 3),
+(3, 'ART003', 1),
+(3, 'ART004', 2),
+(3, 'ART001', 2),
+(4, 'ART002', 3),
+(4, 'ART003', 1),
+(4, 'ART004', 2);
+
+DELIMITER //
+
+CREATE PROCEDURE CheckEmail()
+BEGIN
+    SELECT email_k AS Email,
+        CASE
+            WHEN email_k REGEXP '^[A-Z0-9._%-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$' THEN 1
+            ELSE 0
+        END AS IsValid
+    FROM klient;
+END //
+
+DELIMITER ;
+CALL CheckEmail();
+
+CREATE TABLE HistoryCost (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    change_date DATE NOT NULL default(curdate()),
+    article_t VARCHAR(255) NOT NULL,
+    old_price DECIMAL(10, 2) NOT NULL,
+    new_price DECIMAL(10, 2) NOT NULL,
+    FOREIGN KEY (article_t) REFERENCES tovar(article_t)
+);
+DELIMITER //
+
+CREATE TRIGGER tovar_update
+BEFORE UPDATE ON tovar
+FOR EACH ROW
+BEGIN
+    IF NEW.price_t <> OLD.price_t THEN
+        INSERT INTO HistoryCost (change_date, article_t, old_price, new_price)
+        VALUES (NOW(), OLD.article_t, OLD.price_t, NEW.price_t);
+    END IF;
+END;
+//
+
+DELIMITER ;
+UPDATE `TradeCompany`.`tovar` SET `price_t` = '80.00' WHERE (`article_t` = 'ART001');
+SELECT * FROM TradeCompany.HistoryCost;
+

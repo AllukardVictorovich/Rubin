@@ -1,0 +1,43 @@
+# apt-get update && apt-get install -y MySQL-server
+# systemctl enable --now mysqld
+# systemctl status mysqld.service
+# mysql -u root
+mysql> UPDATE mysql.user SET host='%' WHERE user='root';
+mysql> EXIT;
+# nano script.sh
+#!/bin/bash
+export MYSQL_PWD="1"
+mysql -u root  -e "CREATE DATABASE BD;" 
+mysql -u root  -e "USE BD; CREATE TABLE Users (username VARCHAR(30), password BLOB);" 
+for i in {1..10}
+do
+    PASSWORD=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 5 | head -n 1)
+    USERNAME="user$i"
+    DATABASE="BD$i"
+    mysql -u root  -e "CREATE USER '$USERNAME'@'localhost' IDENTIFIED BY '$PASSWORD';"
+    mysql -u root  -e "CREATE DATABASE $DATABASE;"
+    mysql -u root  -e "GRANT ALL PRIVILEGES ON $DATABASE.* TO '$USERNAME'@'localhost';"
+    mysql -u root  -e "USE BD; INSERT INTO Users (username, password) VALUES ('$USERNAME', A>
+done
+# chmod +x script.sh
+# ./script.sh
+# nano script1.sh
+#!/bin/bash
+export MYSQL_PWD="1"
+mysql -u root  -e "USE BD; SELECT username, CAST(AES_DECRYPT(password, 'secret') AS CHAR)  F>
+# chmod +x script1.sh
+# ./script1.sh
+# nano script2.sh
+#!/bin/bash
+export MYSQL_PWD="1"
+mysqldump -u root  BD > backup.sql
+# chmod +x script2.sh
+# ./script2.sh
+# nano script3.sh
+#!/bin/bash
+export MYSQL_PWD="1"
+mysql -u root  -e "CREATE DATABASE DUMP;"
+mysql -u root  DUMP < backup.sql
+# chmod +x script3.sh
+# ./script3.sh
+

@@ -1,0 +1,26 @@
+
+SELECT k.id_k, k.first_name_k, k.last_name_k, z.id_z, z.date_z, SUM(t.price_t * cz.kolvo) AS total_payment
+FROM klient k
+JOIN zakazi z ON k.id_k = z.id_k
+JOIN consist_zakaz cz ON z.id_z = cz.id_z
+JOIN tovar t ON cz.article_t = t.article_t
+GROUP BY k.id_k, z.id_z;
+
+-- Удалить записи из HistoryCost, которые ссылаются на просроченные товары
+DELETE FROM HistoryCost
+WHERE article_t IN (
+    SELECT article_t FROM tovar WHERE expiration_date_t < CURDATE()
+);
+
+-- Удалить просроченные товары из таблицы tovar
+DELETE FROM tovar
+WHERE expiration_date_t < CURDATE();
+SELECT * FROM TradeCompany.tovar;
+
+UPDATE tovar
+SET price_t = price_t * 0.75
+WHERE country_t = 'Россия';
+SELECT * FROM TradeCompany.tovar;
+
+uuid binary(16) primary key not null default (uuid_to_bin(uuid())),
+insert into employes (uuid, name, last_name, second_name, birthdate, phone, city, atreet, house, apart) values (UUID_TO_BIN('3184292e-e49b-11ee-859f-00155df54038'), 'Петрова', 'Анна', 'Сергеевна', '2004-04-09', '89765676677', 'Москва', 'Иванова', '8', '34');
